@@ -29,7 +29,7 @@ h2 {
 
 .card {
   flex: 0 0 250px;
-  background-color: #1e1e1e;
+  background-color: rgba(0,0,0,0.3);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
@@ -50,7 +50,7 @@ h2 {
   display: flex;
   justify-content: space-around;
   padding: 10px;
-  background-color: #141414;
+  background-color: rgba(0,0,0,0.3);
   font-size: 0.9rem;
 }
 
@@ -115,7 +115,7 @@ h2 {
 }
 
 .mini-card {
-  background-color: #1e1e1e;
+  background-color: #1b1b1b;
   border-radius: 10px;
   overflow: hidden;
   transition: transform 0.3s;
@@ -157,10 +157,28 @@ h2 {
   object-fit: cover;
 }
 
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
 
+.mini-card3 {
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
 
+.mini-card3:hover {
+  transform: scale(1.05);
+}
 
-
+.mini-card3 img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
 
 
 
@@ -243,4 +261,23 @@ header {
 .grid a:hover {
   text-decoration: none; /* Optionnel si tu veux garder un style propre au survol */
   color: inherit;
+}
+
+.footer-question {
+  width: 100%;
+  text-align: center;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  background: #181818;
+  color: #ffffff;
+  padding: 18px 0 12px 0;
+  font-size: 1rem;
+  z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+}
+
+.footer-question a {
+  color: #4fc3f7;
+  text-decoration: underline;
 }
