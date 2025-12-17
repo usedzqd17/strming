@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 import subprocess
 
-TOKEN = "MTM5OTUyOTIyMzMxMTU4OTQ1Nw.G-i7fc.UL9Tl_prDwY6yFwASCYAoNEV93MiWrRJuFA0Ss"
+TOKEN = "MTM5OTUyOTIyMzMxMTU4OTQ1Nw.GdKiWc.e9uqcumFDxHYIFd8jgElF9qTmz4v6O5R_oaZ_I"
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
